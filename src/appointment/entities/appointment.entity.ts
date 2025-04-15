@@ -1,4 +1,6 @@
-import { Entity, Column, PrimaryGeneratedColumn, Timestamp, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, Timestamp, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
+import { AppointmentSlot } from './appointment-slot.entity';
+
 
 export enum AppointmentStatus {
   PENDING = 'PENDING',
@@ -36,4 +38,7 @@ export class Appointment {
 
   @UpdateDateColumn()
   updated_at: Date;
+
+  @OneToMany(() => AppointmentSlot, (appointmentSlot) => appointmentSlot.appointment)
+  appointmentSlots: AppointmentSlot[];
 }

@@ -1,4 +1,3 @@
-import { User } from 'src/user/entities/user.entity';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -6,7 +5,10 @@ import {
   OneToOne,
   JoinColumn,
   ManyToOne,
+  OneToMany,
 } from 'typeorm';
+import { AvailabilitySlot } from './availability-slot.entity';
+import { User } from 'src/user/entities/user.entity';
 
 @Entity({ name: 'practitioner_table' })
 export class Doctor {
@@ -31,4 +33,7 @@ export class Doctor {
 
   @Column({ nullable: true })
   address: string;
+
+  @OneToMany(() => AvailabilitySlot, (availabilitySlot) => availabilitySlot.doctor)
+  availability: AvailabilitySlot[];
 }

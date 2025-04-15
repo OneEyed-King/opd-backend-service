@@ -11,9 +11,14 @@ import { Patient } from './patient/entities/patient.entity';
 import { UserModule } from './user/user.module';
 import { User } from './user/entities/user.entity';
 import { Doctor } from './doctor/entities/doctor.entity';
+import { AvailabilitySlot } from './doctor/entities/availability-slot.entity';
+import { AppointmentSlot } from './appointment/entities/appointment-slot.entity';
 
 @Module({
-  imports: [PatientModule, DoctorModule, ConsultationModule,
+  imports: [
+    PatientModule,
+    DoctorModule,
+    ConsultationModule,
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: 'localhost',
@@ -21,7 +26,7 @@ import { Doctor } from './doctor/entities/doctor.entity';
       username: 'postgres',
       password: 'postgres',
       database: 'opd',
-      entities: [Appointment, Patient, User, Doctor],
+      entities: [Appointment, Patient, User, Doctor, AvailabilitySlot, AppointmentSlot],
       synchronize: true, // ✅ Auto-create tables (use only in dev!)
     }),
     AppointmentModule,
@@ -29,6 +34,5 @@ import { Doctor } from './doctor/entities/doctor.entity';
   ],
   controllers: [AppController],
   providers: [AppService],
-  
 })
 export class AppModule {}

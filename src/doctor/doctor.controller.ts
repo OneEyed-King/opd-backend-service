@@ -1,7 +1,9 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Put } from '@nestjs/common';
 import { DoctorService } from './doctor.service';
 import { CreateDoctorDto } from './dto/create-doctor.dto';
 import { UpdateDoctorDto } from './dto/update-doctor.dto';
+import { UpdateAvailabilitySlotDto } from './dto/update-availability-slot.dto';
+
 
 @Controller('doctor')
 export class DoctorController {
@@ -30,5 +32,10 @@ export class DoctorController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.doctorService.remove(+id);
+  }
+
+  @Put(':id/slots')
+  updateSlots(@Param('id') id: string, @Body() updateAvailabilitySlotDto: UpdateAvailabilitySlotDto) {
+    return this.doctorService.updateSlots(+id, updateAvailabilitySlotDto);
   }
 }

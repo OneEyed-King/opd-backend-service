@@ -1,30 +1,37 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateDoctorDto } from './dto/create-doctor.dto';
 import { UpdateDoctorDto } from './dto/update-doctor.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Doctor } from './entities/doctor.entity';
 import { Repository } from 'typeorm';
 import { User, UserRole } from 'src/user/entities/user.entity';
-import { promises } from 'dns';
+import { AvailabilitySlot } from './entities/availability-slot.entity';
+import { AppointmentSlot } from 'src/appointment/entities/appointment-slot.entity';
+import { addMinutes, format } from 'date-fns';
+import { UpdateAvailabilitySlotDto } from './dto/update-availability-slot.dto';
+
 
 @Injectable()
 export class DoctorService {
-
   constructor(
     @InjectRepository(Doctor)
     private readonly doctorRepo: Repository<Doctor>,
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
+    @InjectRepository(AvailabilitySlot)
+    private readonly availabilitySlotRepo: Repository<AvailabilitySlot>,
+    @InjectRepository(AppointmentSlot)
+    private readonly appointmentSlotRepo: Repository<AppointmentSlot>,
   ) {}
 
   async create(createDoctorDto: CreateDoctorDto): Promise<Doctor> {
-    const { user: userData, ...doctorData } = createDoctorDto;
+    const { user: userData, availability, ...doctorData } = createDoctorDto;
 
     // Step 1: Create & save user
     const user = this.userRepo.create({
       ...userData,
       role: UserRole.DOCTOR, // Ensure correct role
-      oryId: 'someid'
+      oryId: 'someid',
     });
     const savedUser = await this.userRepo.save(user);
 
@@ -33,9 +40,69 @@ export class DoctorService {
       ...doctorData,
       user: savedUser,
     });
-    return await this.doctorRepo.save(doctor);
+    const savedDoctor = await this.doctorRepo.save(doctor);
+
+    // Step 3: Link and save availability slots and generate appointment slots
+    if (availability && availability.length > 0) {
+      await this.updateAvailabilitySlots(savedDoctor, availability);
+    }
+
+    return savedDoctor;
   }
 
+  private async generateAppointmentSlots(doctor: Doctor, availabilitySlots: AvailabilitySlot[]) {
+    const appointmentSlots: AppointmentSlot[] = [];
+
+    for (const availabilitySlot of availabilitySlots) {
+      const startTime = new Date(`1970-01-01T${availabilitySlot.startTime}`);
+      const endTime = new Date(`1970-01-01T${availabilitySlot.endTime}`);
+
+      let currentStartTime = startTime;
+
+      while (currentStartTime < endTime) {
+        const currentEndTime = addMinutes(currentStartTime, 20);
+
+        if (currentEndTime <= endTime) {
+          const appointmentSlot = this.appointmentSlotRepo.create({
+            startTime: format(currentStartTime, 'HH:mm'),
+            endTime: format(currentEndTime, 'HH:mm'),
+            date: new Date(),
+            doctor,
+          });
+
+          appointmentSlots.push(appointmentSlot);
+        }
+        currentStartTime = currentEndTime;
+      }
+    }
+
+    await this.appointmentSlotRepo.save(appointmentSlots);
+  }
+
+  async updateSlots(doctorId: number, updateAvailabilitySlotDto: UpdateAvailabilitySlotDto): Promise<void> {
+    const { availability } = updateAvailabilitySlotDto;
+    const doctor = await this.doctorRepo.findOne({ where: { id: doctorId } });
+
+    if (!doctor) {
+      throw new NotFoundException(`Doctor with ID ${doctorId} not found`);
+    }
+
+    await this.updateAvailabilitySlots(doctor, availability);
+  }
+
+  private async updateAvailabilitySlots(doctor: Doctor, availability: AvailabilitySlot[]) {
+    // Remove existing availability slots for the doctor
+    await this.availabilitySlotRepo.delete({ doctor });
+
+    // Save new availability slots
+    for (const slot of availability) {
+      slot.doctor = doctor;
+    }
+    await this.availabilitySlotRepo.save(availability);
+
+    // Regenerate appointment slots
+    await this.generateAppointmentSlots(doctor, availability);
+  }
 
   findAll() {
     return `This action returns all doctor`;
