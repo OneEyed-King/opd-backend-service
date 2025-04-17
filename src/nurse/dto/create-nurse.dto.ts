@@ -13,6 +13,10 @@ export class CreateNurseDto {
     @IsOptional()
     @IsString()
     shift?: string;
+
+    @IsOptional()
+    @IsString()
+    department?: string;
   
     @ValidateNested()
     @Type(() => CreateUserDto)

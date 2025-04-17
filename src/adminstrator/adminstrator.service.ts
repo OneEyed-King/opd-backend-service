@@ -4,7 +4,7 @@ import { UpdateAdminstratorDto } from './dto/update-adminstrator.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Adminstrator } from './entities/adminstrator.entity';
 import { Repository } from 'typeorm';
-import { User } from 'src/user/entities/user.entity';
+import { User, UserRole } from 'src/user/entities/user.entity';
 
 @Injectable()
 export class AdminstratorService {
@@ -17,9 +17,13 @@ export class AdminstratorService {
   ) {}
 
   async create(createAdminstratorDto: CreateAdminstratorDto,): Promise<Adminstrator> {
-    const { user, ...administratorData } = createAdminstratorDto;
+    const { user:userData, ...administratorData } = createAdminstratorDto;
 
-    const newUser = this.userRepository.create(user);
+    const newUser = this.userRepository.create({
+      ...userData,
+      role: UserRole.ADMIN,
+      oryId: 'someid'
+    });
     const savedUser = await this.userRepository.save(newUser);
 
     const admin = this.adminRaepository.create({

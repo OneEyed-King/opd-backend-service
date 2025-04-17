@@ -4,7 +4,7 @@ import { UpdateNurseDto } from './dto/update-nurse.dto';
 import { Nurse } from './entities/nurse.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { User } from 'src/user/entities/user.entity';
+import { User, UserRole } from 'src/user/entities/user.entity';
 
 @Injectable()
 export class NurseService {
@@ -17,9 +17,15 @@ export class NurseService {
   ) {}
 
   async create(createNurseDto: CreateNurseDto): Promise<Nurse> {
-    const { user, ...nurseData } = createNurseDto;
+    const { user: userData, ...nurseData } = createNurseDto;
 
-    const newUser = this.userRepository.create(user);
+    const newUser = this.userRepository.create({
+      ...userData,
+      role: UserRole.NURSE,
+      oryId: 'someId'
+
+
+    });
     const savedUser = await this.userRepository.save(newUser);
 
     const nurse = this.nurseRepository.create({

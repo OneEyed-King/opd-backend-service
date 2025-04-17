@@ -4,7 +4,7 @@ import { UpdateReceptionDto } from './dto/update-reception.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Reception } from './entities/reception.entity';
 import { Repository } from 'typeorm';
-import { User } from 'src/user/entities/user.entity';
+import { User, UserRole } from 'src/user/entities/user.entity';
 
 @Injectable()
 export class ReceptionService {
@@ -17,9 +17,13 @@ export class ReceptionService {
   ) {}
 
   async create(createReceptionDto: CreateReceptionDto): Promise<Reception> {
-    const { user, ...receptionintData } = createReceptionDto;
+    const { user:userData, ...receptionintData } = createReceptionDto;
 
-    const newUser = this.userRepository.create(user);
+    const newUser = this.userRepository.create({
+      ...userData,
+      role: UserRole.RECEPTION,
+      oryId: 'someid'
+    });
     const savedUser = await this.userRepository.save(newUser);
 
     const receptionist = this.receptionistRepository.create({
