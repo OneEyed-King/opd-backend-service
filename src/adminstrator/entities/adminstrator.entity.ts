@@ -3,23 +3,26 @@ import { User } from 'src/user/entities/user.entity';
 
 @Entity({ name: 'admin_table' })
 export class Adminstrator {
-    @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @ManyToOne(() => User, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'userId' })
+  @JoinColumn({ name: 'user_id' })
   user: User;
 
-  @Column()
-  fullName: string;
+  @Column({ name: 'first_name' })
+  firstName: string;
 
-  @Column({ nullable: true })
+  @Column({ name: 'last_name' })
+  lastName: string;
+
+  @Column({ nullable: true, name: 'office_number' })
   officeNumber: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, name: 'role_title' })
   roleTitle: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, name: 'email' })
   contactEmail: string;
   
 }

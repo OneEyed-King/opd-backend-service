@@ -4,15 +4,18 @@ import { User } from 'src/user/entities/user.entity';
 
 @Entity({ name: 'nurse_table' })
 export class Nurse {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @ManyToOne(() => User, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'userId' })
   user: User;
 
-  @Column()
-  fullName: string;
+  @Column({ name: 'first_name' })
+  firstName: string;
+
+  @Column({ name: 'last_name' })
+  lastName: string;
 
   @Column({ nullable: true })
   department: string;

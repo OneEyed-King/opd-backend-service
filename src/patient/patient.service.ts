@@ -3,7 +3,7 @@ import { CreatePatientDto } from './dto/create-patient.dto';
 import { UpdatePatientDto } from './dto/update-patient.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Patient } from './entities/patient.entity';
-import { Repository } from 'typeorm';
+import { Brackets, Repository } from 'typeorm';
 import { User, UserRole } from 'src/user/entities/user.entity';
 
 @Injectable()
@@ -26,8 +26,7 @@ export class PatientService {
       oryId: 'someid',
       email: patientData.email,
       password: 'somepass',
-      isActive: false
-      
+      isActive: false,
     });
     const savedUser = await this.userRepository.save(newUser);
 
@@ -39,11 +38,32 @@ export class PatientService {
     return await this.patientRepo.save(patient);
   }
 
+  getByName(firstName: string, lastName: string): Promise<Patient[]> {
+    const query = this.patientRepo.createQueryBuilder('p');
+
+    query.where(
+      new Brackets((qb) => {
+        if (firstName) {
+          qb.orWhere(`LOWER(p.first_name) LIKE LOWER(:firstNameLike)`, {
+            firstNameLike: `%${firstName}%`,
+          });
+        }
+        if (lastName) {
+          qb.orWhere(`LOWER(p.last_name) LIKE LOWER(:lastNameLike)`, {
+            lastNameLike: `%${lastName}%`,
+          });
+        }
+      }),
+    );
+
+    return query.getMany();
+  }
+
   findAll() {
     return this.patientRepo.find();
   }
 
-  findOne(id: number) {
+  findOne(id: string) {
     return this.patientRepo.findOne({
       where: { id },
     });
