@@ -8,9 +8,11 @@ import { AvailabilitySlot } from './entities/availability-slot.entity';
 import { AppointmentModule } from 'src/appointment/appointment.module';
 import { AppointmentSlot } from 'src/appointment/entities/appointment-slot.entity';
 
-
 @Module({
-  imports: [TypeOrmModule.forFeature([Doctor, User, AvailabilitySlot, AppointmentSlot]), AppointmentModule],
+  imports: [
+    TypeOrmModule.forFeature([Doctor, User, AvailabilitySlot, AppointmentSlot]),
+    AppointmentModule,
+  ],
   controllers: [DoctorController],
   providers: [DoctorService],
 })

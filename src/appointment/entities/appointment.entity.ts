@@ -1,5 +1,7 @@
-import { Entity, Column, PrimaryGeneratedColumn, Timestamp, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, Timestamp, CreateDateColumn, UpdateDateColumn, OneToMany, JoinColumn, ManyToOne } from 'typeorm';
 import { AppointmentSlot } from './appointment-slot.entity';
+import { Patient } from 'src/patient/entities/patient.entity';
+import { Doctor } from 'src/doctor/entities/doctor.entity';
 
 
 export enum AppointmentStatus {
@@ -11,14 +13,14 @@ export enum AppointmentStatus {
 
 @Entity({ name: 'appointment' })
 export class Appointment {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
-  @Column()
-  patientId: number;
+  @Column({ name: 'patient_id' })
+  patientId: string;
 
-  @Column()
-  doctorId: number;
+  @Column({ name: 'doctor_id' })
+  doctorId: string;
 
   @Column({
     type: 'enum',
@@ -27,7 +29,7 @@ export class Appointment {
   })
   status: AppointmentStatus;
 
-  @Column({ type: 'timestamp' })
+  @Column({ type: 'timestamp', name: 'appointment_date' })
   appointmentDate: Date;
 
   @Column()

@@ -13,6 +13,12 @@ import { User } from './user/entities/user.entity';
 import { Doctor } from './doctor/entities/doctor.entity';
 import { AvailabilitySlot } from './doctor/entities/availability-slot.entity';
 import { AppointmentSlot } from './appointment/entities/appointment-slot.entity';
+import { NurseModule } from './nurse/nurse.module';
+import { ReceptionModule } from './reception/reception.module';
+import { AdminstratorModule } from './adminstrator/adminstrator.module';
+import { Nurse } from './nurse/entities/nurse.entity';
+import { Adminstrator } from './adminstrator/entities/adminstrator.entity';
+import { Reception } from './reception/entities/reception.entity';
 
 @Module({
   imports: [
@@ -26,11 +32,24 @@ import { AppointmentSlot } from './appointment/entities/appointment-slot.entity'
       username: 'postgres',
       password: 'postgres',
       database: 'opd',
-      entities: [Appointment, Patient, User, Doctor, AvailabilitySlot, AppointmentSlot],
+      entities: [
+        Appointment,
+        Patient,
+        User,
+        Doctor,
+        AvailabilitySlot,
+        AppointmentSlot,
+        Nurse,
+        Adminstrator,
+        Reception,
+      ],
       synchronize: true, // ✅ Auto-create tables (use only in dev!)
     }),
     AppointmentModule,
     UserModule,
+    NurseModule,
+    ReceptionModule,
+    AdminstratorModule,
   ],
   controllers: [AppController],
   providers: [AppService],

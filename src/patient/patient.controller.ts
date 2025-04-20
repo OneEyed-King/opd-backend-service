@@ -1,7 +1,17 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Query,
+} from '@nestjs/common';
 import { PatientService } from './patient.service';
 import { CreatePatientDto } from './dto/create-patient.dto';
 import { UpdatePatientDto } from './dto/update-patient.dto';
+import { Patient } from './entities/patient.entity';
 
 @Controller('patient')
 export class PatientController {
@@ -17,9 +27,17 @@ export class PatientController {
     return this.patientService.findAll();
   }
 
+  @Get('get-by-name')
+  getByName(
+    @Query('firstName') firstName: string,
+    @Query('lastName') lastName: string,
+  ): Promise<Patient[]> {
+    return this.patientService.getByName(firstName,lastName);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.patientService.findOne(+id);
+    return this.patientService.findOne(id);
   }
 
   @Patch(':id')

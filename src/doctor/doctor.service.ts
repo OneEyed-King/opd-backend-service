@@ -10,7 +10,6 @@ import { AppointmentSlot } from 'src/appointment/entities/appointment-slot.entit
 import { addMinutes, format } from 'date-fns';
 import { UpdateAvailabilitySlotDto } from './dto/update-availability-slot.dto';
 
-
 @Injectable()
 export class DoctorService {
   constructor(
@@ -50,7 +49,10 @@ export class DoctorService {
     return savedDoctor;
   }
 
-  private async generateAppointmentSlots(doctor: Doctor, availabilitySlots: AvailabilitySlot[]) {
+  private async generateAppointmentSlots(
+    doctor: Doctor,
+    availabilitySlots: AvailabilitySlot[],
+  ) {
     const appointmentSlots: AppointmentSlot[] = [];
 
     for (const availabilitySlot of availabilitySlots) {
@@ -66,8 +68,9 @@ export class DoctorService {
           const appointmentSlot = this.appointmentSlotRepo.create({
             startTime: format(currentStartTime, 'HH:mm'),
             endTime: format(currentEndTime, 'HH:mm'),
-            date: new Date(),
             doctor,
+            isBooked: false,
+            dayOfWeek: availabilitySlot.day,
           });
 
           appointmentSlots.push(appointmentSlot);
@@ -79,7 +82,10 @@ export class DoctorService {
     await this.appointmentSlotRepo.save(appointmentSlots);
   }
 
-  async updateSlots(doctorId: number, updateAvailabilitySlotDto: UpdateAvailabilitySlotDto): Promise<void> {
+  async updateSlots(
+    doctorId: string,
+    updateAvailabilitySlotDto: UpdateAvailabilitySlotDto,
+  ): Promise<void> {
     const { availability } = updateAvailabilitySlotDto;
     const doctor = await this.doctorRepo.findOne({ where: { id: doctorId } });
 
@@ -90,7 +96,10 @@ export class DoctorService {
     await this.updateAvailabilitySlots(doctor, availability);
   }
 
-  private async updateAvailabilitySlots(doctor: Doctor, availability: AvailabilitySlot[]) {
+  private async updateAvailabilitySlots(
+    doctor: Doctor,
+    availability: AvailabilitySlot[],
+  ) {
     // Remove existing availability slots for the doctor
     await this.availabilitySlotRepo.delete({ doctor });
 
@@ -102,6 +111,38 @@ export class DoctorService {
 
     // Regenerate appointment slots
     await this.generateAppointmentSlots(doctor, availability);
+  }
+
+  async getAvailableSlots(doctorId: string): Promise<AppointmentSlot[]> {
+    return this.appointmentSlotRepo
+      .createQueryBuilder('slot')
+      .where('slot.doctor_id = :doctorId', { doctorId })
+      .andWhere('slot.is_booked = :isBooked', { isBooked: false })
+      .getMany();
+  }
+
+  getDoctorByName(
+    firstName: string | null,
+    lastName: string | null,
+  ): Promise<Doctor[]> {
+    const query = this.doctorRepo.createQueryBuilder('p');
+
+    query.where(
+      `(:firstName::text IS NULL OR LOWER(p.first_name) LIKE LOWER(:firstNameLike))`,
+    );
+
+    query.orWhere(
+      `(:lastName::text IS NULL OR LOWER(p.last_name) LIKE LOWER(:lastNameLike))`,
+    );
+
+    return query
+      .setParameters({
+        firstName,
+        firstNameLike: `%${firstName || ''}%`,
+        lastName,
+        lastNameLike: `%${lastName || ''}%`,
+      })
+      .getMany();
   }
 
   findAll() {

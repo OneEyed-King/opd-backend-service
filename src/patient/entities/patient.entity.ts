@@ -20,17 +20,19 @@ import { User } from 'src/user/entities/user.entity';
 
 @Entity({ name: 'patient' })
 export class Patient {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @ManyToOne(() => User, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'userId' })
   user: User;
 
+  @Column({name: 'first_name'})
   @IsString()
   @Length(1, 100)
   firstName: string;
 
+  @Column({name: 'last_name'})
   @IsString()
   @Length(1, 100)
   lastName: string;
