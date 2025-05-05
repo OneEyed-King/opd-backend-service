@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { CreateAdminstratorDto } from './dto/create-adminstrator.dto';
 import { UpdateAdminstratorDto } from './dto/update-adminstrator.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -8,6 +8,8 @@ import { User, UserRole } from 'src/user/entities/user.entity';
 
 @Injectable()
 export class AdminstratorService {
+  private readonly logger = new Logger(AdminstratorService.name);
+
   constructor(
     @InjectRepository(Adminstrator)
     private adminRaepository: Repository<Adminstrator>,
@@ -17,6 +19,7 @@ export class AdminstratorService {
   ) {}
 
   async create(createAdminstratorDto: CreateAdminstratorDto,): Promise<Adminstrator> {
+    this.logger.log('Creating admin');
     const { user:userData, ...administratorData } = createAdminstratorDto;
 
     const newUser = this.userRepository.create({
@@ -35,18 +38,22 @@ export class AdminstratorService {
   }
 
   findAll() {
+    this.logger.log('Find all admins');
     return `This action returns all adminstrator`;
   }
 
   findOne(id: number) {
+    this.logger.log('Find one admin');
     return `This action returns a #${id} adminstrator`;
   }
 
   update(id: number, updateAdminstratorDto: UpdateAdminstratorDto) {
+    this.logger.log('Updating admin');
     return `This action updates a #${id} adminstrator`;
   }
 
   remove(id: number) {
+    this.logger.log('Removing admin');
     return `This action removes a #${id} adminstrator`;
   }
 }
